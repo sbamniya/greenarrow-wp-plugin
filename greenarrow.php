@@ -66,7 +66,7 @@ function deliver_mail() {
 	$isGoogleRecaptchaEnabled = get_option("ga-google-captcha") == 1;
 	if ($isGoogleRecaptchaEnabled) {
 		$recaptcha = $_POST['g-recaptcha-response'];
-		$secret_key = get_option("ga-google-site-key");
+		$secret_key = get_option("ga-google-site-secret");
 		// Hitting request to the URL, Google will
 		// respond with success or error scenario
 		$url = 'https://www.google.com/recaptcha/api/siteverify?secret='
@@ -162,7 +162,8 @@ function save_greenarrow_configuration() {
 		$listId   = $_POST["ga-list-id"];
 		$isDoubleOptIn   = isset($_POST["ga-double-opt"]) ? 1 : 0;
 		$googleCaptchaEnabled   = isset($_POST["ga-google-captcha"]) ? 1 : 0;
-		$googleSiteKey   = isset($_POST["ga-google-site-key"]) ? $_POST["ga-google-site-key"] : "";
+		$googleSiteKey   = $_POST["ga-google-site-key"];
+		$googleSiteSecret = $_POST["ga-google-site-secret"];
 
 		update_option("ga-host", $host);
 		update_option("ga-api-key", $apiKey);
@@ -170,6 +171,7 @@ function save_greenarrow_configuration() {
 		update_option("ga-double-opt", $isDoubleOptIn);
 		update_option("ga-google-captcha", $googleCaptchaEnabled);
 		update_option("ga-google-site-key", $googleSiteKey);
+		update_option("ga-google-site-secret", $googleSiteSecret);
 	}
 }
 
@@ -314,7 +316,23 @@ function green_arrow_newsletter_configuration() {
 				class="regular-text"
 			/>
 			<p class="description" id="ga-google-site-key-description">
-				List you want the email to be pushed in.
+				Public key provided by google.
+			</p>
+			</td>
+		</tr>
+		<tr>
+			<th scope="row"><label for="ga-list-id">Google Secret</label></th>
+			<td>
+			<input
+				name="ga-google-site-secret"
+				type="text"
+				id="ga-google-site-secret"
+				aria-describedby="ga-google-site-secret-description"
+				value="<?=get_option("ga-google-site-secret")?>"
+				class="regular-text"
+			/>
+			<p class="description" id="ga-google-site-secret-description">
+				Secret provided by google. Required for verification.
 			</p>
 			</td>
 		</tr>

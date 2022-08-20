@@ -79,7 +79,7 @@ function deliver_mail() {
 		// JSON format, so we have to parse
 		// that json
 		$response = json_decode($response);
-	
+		print_r($response);
 		// Checking, if response is true or not
 		if ($response->success != true) {
 			echo "<div class='ga-error-message'>Please verify captcha.</div>";

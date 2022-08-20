@@ -79,6 +79,12 @@ function deliver_mail() {
 	}
 }
 function html_form_code() {
+	$isGoogleRecaptchaEnabled = get_option("ga-google-captcha") == 1 ? true : false;
+	if ($isGoogleRecaptchaEnabled) {
+		?>
+			<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+		<?php
+	}
 	?>
     <div>
 		<p>Subscribe to our daily newsletter</p>
@@ -93,6 +99,14 @@ function html_form_code() {
 		<form action="<?=esc_url($_SERVER['REQUEST_URI'])?>" method="post" class="ga-newsletter-form">
 			<label class="label">Email</label>
 			<input type="email" required id="nsf-email" name="nsf-email" value="<?=isset( $_POST["cf-email"] ) ? esc_attr( $_POST["nsf-email"] ) : '' ?>" size="40" class="email-input" />
+			<?php
+			if ($isGoogleRecaptchaEnabled) {
+				?>
+					<div class="g-recaptcha" data-sitekey="<?=get_option("ga-google-site-key")?>"></div>
+      				<br/>
+				<?php
+			}
+			?>
 			<p><input type="checkbox" required name="nsf-confirm" value="1"> By continuing, you accept the privacy policy</p>
 			<p><input type="submit" name="nsf-submitted" value="Subscribe"></p>
 			
@@ -120,11 +134,15 @@ function save_greenarrow_configuration() {
 		$apiKey   = $_POST["ga-api-key"];
 		$listId   = $_POST["ga-list-id"];
 		$isDoubleOptIn   = isset($_POST["ga-double-opt"]) ? 1 : 0;
+		$googleCaptchaEnabled   = isset($_POST["ga-google-captcha"]) ? 1 : 0;
+		$googleSiteKey   = isset($_POST["ga-google-site-key"]) ? $_POST["ga-google-site-key"] : "";
 
 		update_option("ga-host", $host);
 		update_option("ga-api-key", $apiKey);
 		update_option("ga-list-id", $listId);
 		update_option("ga-double-opt", $isDoubleOptIn);
+		update_option("ga-google-captcha", $googleCaptchaEnabled);
+		update_option("ga-google-site-key", $googleSiteKey);
 	}
 }
 
@@ -220,6 +238,56 @@ function green_arrow_newsletter_configuration() {
 			?>
 			<p class="description" id="ga-double-opt-description">
 				If it's checked, it will send an email before the user is added to the list.
+			</p>
+			</td>
+		</tr>
+		<tr>
+			<th scope="row"><label for="ga-double-opt">Enable Google re-Captcha</label></th>
+			<td>
+			<?php 
+			if (get_option("ga-google-captcha") == 1) {
+			?>
+				<input
+					name="ga-google-captcha"
+					type="checkbox"
+					id="ga-google-captcha"
+					aria-describedby="ga-google-captcha-description"
+					value="1"
+					class="regular-text"
+					checked
+				/>
+				<?php
+			} else {
+			?>
+				<input
+					name="ga-google-captcha"
+					type="checkbox"
+					id="ga-google-captcha"
+					aria-describedby="ga-google-captcha-description"
+					value="1"
+					class="regular-text"
+				/>
+				<?php
+			}
+			?>
+			<p class="description" id="ga-google-captcha-description">
+				If you want to have google captcha verification on the website.
+			</p>
+			</td>
+		</tr>
+		<tr>
+			<th scope="row"><label for="ga-list-id">Google API Key</label></th>
+			<td>
+			<input
+				name="ga-google-site-key"
+				type="text"
+				id="ga-google-site-key"
+				aria-describedby="ga-google-site-key-description"
+				value="<?=get_option("ga-google-site-key")?>"
+				class="regular-text"
+			/>
+			<p class="description" id="ga-google-site-key-description">
+				List you want the email to be pushed in.
 			</p>
 			</td>
 		</tr>

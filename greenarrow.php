@@ -52,31 +52,58 @@ function add_to_list($token) {
 
 function deliver_mail() {
 
-	// if the submit button is clicked, send the email
-	if ( isset($_POST['nsf-submitted'] ) ) {
-
-		// sanitize form values
-		$email   = sanitize_email( $_POST["nsf-email"] );
-		if ( empty( $email ) ) {
-			echo "<div class='ga-error-message'>Please enter email.</div>";
-		} else {
-			$isDoubleOptIn = get_option("ga-double-opt");
-			$token = base64_encode(json_encode(["email" => $email]));
-			if ($isDoubleOptIn == "1") {
-				$subject = "Thank you for subscribing to our newsletter";
-				$body = "<div>You have successfully subscribed to our newsletter. Please click on the link to confirm your subscription.</div><div><a href='".get_home_url()."?ga-confirmation-token=$token'>Confirm Subscription</a></div>";
-				$headers = array('Content-Type: text/html; charset=UTF-8');
-				if (wp_mail($email, $subject,$body, $headers)) {
-					echo "<div class='ga-error-message'>You have successfully subscribed to our newsletter. We have sent you a confirmation link on the email.</div>";
-				} else {
-					echo "<div class='ga-success-message'>An error occurred while sending email.</div>";
-				}
-			} else {
-				add_to_list($token);
-			}
-		}
-
+	if (!isset($_POST['nsf-submitted'] ) ) {
+		return;
 	}
+	// sanitize form values
+	$email   = sanitize_email( $_POST["nsf-email"] );
+	if ( empty( $email ) ) {
+		echo "<div class='ga-error-message'>Please enter email.</div>";
+
+		return;
+	} 
+	$isDoubleOptIn = get_option("ga-double-opt");
+	$isGoogleRecaptchaEnabled = get_option("ga-google-captcha") == 1;
+	if ($isGoogleRecaptchaEnabled) {
+		$recaptcha = $_POST['g-recaptcha-response'];
+		$secret_key = get_option("ga-google-site-key");
+		// Hitting request to the URL, Google will
+		// respond with success or error scenario
+		$url = 'https://www.google.com/recaptcha/api/siteverify?secret='
+			. $secret_key . '&response=' . $recaptcha;
+	
+		// Making request to verify captcha
+		$response = file_get_contents($url);
+	
+		// Response return by google is in
+		// JSON format, so we have to parse
+		// that json
+		$response = json_decode($response);
+	
+		// Checking, if response is true or not
+		if ($response->success != true) {
+			echo "<div class='ga-error-message'>Please verify captcha.</div>";
+			return;
+		}
+	}
+
+	$token = base64_encode(json_encode(["email" => $email]));
+
+	if ($isDoubleOptIn == "1") {
+		$subject = "Thank you for subscribing to our newsletter";
+		$body = "<div>You have successfully subscribed to our newsletter. Please click on the link to confirm your subscription.</div><div><a href='".get_home_url()."?ga-confirmation-token=$token'>Confirm Subscription</a></div>";
+		$headers = array('Content-Type: text/html; charset=UTF-8');
+		if (wp_mail($email, $subject,$body, $headers)) {
+			echo "<div class='ga-error-message'>You have successfully subscribed to our newsletter. We have sent you a confirmation link on the email.</div>";
+		} else {
+			echo "<div class='ga-success-message'>An error occurred while sending email.</div>";
+		}
+		return;
+	} 
+
+	add_to_list($token);
+		
+	
 }
 function html_form_code() {
 	$isGoogleRecaptchaEnabled = get_option("ga-google-captcha") == 1 ? true : false;

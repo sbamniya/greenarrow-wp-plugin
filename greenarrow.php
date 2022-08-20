@@ -129,9 +129,8 @@ function html_form_code() {
 			<?php
 			if ($isGoogleRecaptchaEnabled) {
 				?>
+					<div class="g-recaptcha" data-sitekey="<?=get_option("ga-google-site-key")?>" style="margin-top: 10px"></div>
 					<br/>
-					<div class="g-recaptcha" data-sitekey="<?=get_option("ga-google-site-key")?>"></div>
-      				<br/>
 				<?php
 			}
 			?>

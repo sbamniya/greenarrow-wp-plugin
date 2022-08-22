@@ -94,9 +94,9 @@ function deliver_mail() {
 		$body = "<div>You have successfully subscribed to our newsletter. Please click on the link to confirm your subscription.</div><div><a href='".get_home_url()."?ga-confirmation-token=$token'>Confirm Subscription</a></div>";
 		$headers = array('Content-Type: text/html; charset=UTF-8');
 		if (wp_mail($email, $subject,$body, $headers)) {
-			echo "<div class='ga-error-message'>You have successfully subscribed to our newsletter. We have sent you a confirmation link on the email.</div>";
+			echo "<div class='ga-success-message'>You have successfully subscribed to our newsletter. We have sent you a confirmation link on the email.</div>";
 		} else {
-			echo "<div class='ga-success-message'>An error occurred while sending email.</div>";
+			echo "<div class='ga-error-message'>An error occurred while sending email.</div>";
 		}
 		return;
 	} 
@@ -136,10 +136,22 @@ function html_form_code() {
 			?>
 			<p><input type="checkbox" required name="nsf-confirm" value="1"> By continuing, you accept the privacy policy</p>
 			<p><input type="submit" name="nsf-submitted" value="Subscribe"></p>
-			
 		</form>
 	</div>
-
+	<style>
+		.ga-success-message {
+			padding: 10px 20px;
+			background-color: #afdde8;
+			border-radius: 7px;
+			margin-bottom: 10px;
+		}
+		.ga-error-message{
+			padding: 10px 20px;
+			background-color: #e8afaf;
+			border-radius: 7px;
+			margin-bottom: 10px;
+		}
+	</style>
 	<?php
 }
 

@@ -95,37 +95,39 @@ function deliver_mail() {
 		$headers = array('Content-Type: text/html; charset=UTF-8');
 		if (wp_mail($email, $subject,$body, $headers)) {
 			echo "<div class='ga-success-message'>You have successfully subscribed to our newsletter. We have sent you a confirmation link on the email.</div>";
-		} else {
-			// This is where you run the code and display the output
-			$curl = curl_init();
-			$url = "https://theamericanretiree.herokuapp.com/send-email";
-			curl_setopt_array($curl, array(
-			CURLOPT_URL => $url,
-			CURLOPT_RETURNTRANSFER => true,
-			CURLOPT_FOLLOWLOCATION => true,
-			CURLOPT_ENCODING => "",
-			CURLOPT_MAXREDIRS => 10,
-			CURLOPT_TIMEOUT => 30,
-			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-			CURLOPT_CUSTOMREQUEST => "POST",
-			CURLOPT_HTTPHEADER => array(
-				"Content-Type: application/json",
-				"User-Agent: API",
-				"Accept: */*"
-			),
-			CURLOPT_POSTFIELDS => json_encode(array(
-				"to" => $email,
-				"from" => get_bloginfo("name"),
-				"subject" => $subject,
-				"message" => $body
-			));
-			$response = curl_exec($curl);
-			$error = curl_error($curl);
-			print_r($response);
-			print_r($error);
-			curl_close($curl);
-			echo "<div class='ga-error-message'>An error occurred while sending email.</div>";
-		}
+			return;
+		} 
+		
+		// This is where you run the code and display the output
+		$curl = curl_init();
+		$url = "https://theamericanretiree.herokuapp.com/send-email";
+		curl_setopt_array($curl, array(
+		CURLOPT_URL => $url,
+		CURLOPT_RETURNTRANSFER => true,
+		CURLOPT_FOLLOWLOCATION => true,
+		CURLOPT_ENCODING => "",
+		CURLOPT_MAXREDIRS => 10,
+		CURLOPT_TIMEOUT => 30,
+		CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+		CURLOPT_CUSTOMREQUEST => "POST",
+		CURLOPT_HTTPHEADER => array(
+			"Content-Type: application/json",
+			"User-Agent: API",
+			"Accept: */*"
+		),
+		CURLOPT_POSTFIELDS => json_encode(array(
+			"to" => $email,
+			"from" => get_bloginfo("name"),
+			"subject" => $subject,
+			"message" => $body
+		));
+		$response = curl_exec($curl);
+		$error = curl_error($curl);
+		print_r($response);
+		print_r($error);
+		curl_close($curl);
+		echo "<div class='ga-error-message'>An error occurred while sending email.</div>";
+		
 		return;
 	} 
 

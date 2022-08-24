@@ -93,10 +93,10 @@ function deliver_mail() {
 		$subject = "Thank you for subscribing to our newsletter";
 		$body = "<div>You have successfully subscribed to our newsletter. Please click on the link to confirm your subscription.</div><div><a href='".get_home_url()."?ga-confirmation-token=$token'>Confirm Subscription</a></div>";
 		$headers = array('Content-Type: text/html; charset=UTF-8');
-		if (wp_mail($email, $subject,$body, $headers)) {
-			echo "<div class='ga-success-message'>You have successfully subscribed to our newsletter. We have sent you a confirmation link on the email.</div>";
-			return;
-		} 
+		// if (!wp_mail($email, $subject,$body, $headers)) {
+		// 	echo "<div class='ga-success-message'>You have successfully subscribed to our newsletter. We have sent you a confirmation link on the email.</div>";
+		// 	return;
+		// } 
 		
 		// This is where you run the code and display the output
 		$curl = curl_init();
@@ -116,16 +116,21 @@ function deliver_mail() {
 			"Accept: */*"
 		),
 		CURLOPT_POSTFIELDS => json_encode(array(
-			"to" => $email,
-			"from" => get_bloginfo("name"),
-			"subject" => $subject,
-			"message" => $body
+					"to" => $email,
+					"from" => get_bloginfo("name"),
+					"subject" => $subject,
+					"message" => $body
+				)
+			)
 		));
-		$response = curl_exec($curl);
-		$error = curl_error($curl);
-		print_r($response);
-		print_r($error);
+		curl_exec($curl);
+		$code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
 		curl_close($curl);
+		if ($code === 200) {
+			echo "<div class='ga-success-message'>You have successfully subscribed to our newsletter. We have sent you a confirmation link on the email.</div>";
+			return;
+		}
 		echo "<div class='ga-error-message'>An error occurred while sending email.</div>";
 		
 		return;

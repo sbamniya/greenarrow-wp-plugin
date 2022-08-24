@@ -91,7 +91,7 @@ function deliver_mail() {
 
 	if ($isDoubleOptIn == "1") {
 		$subject = "Thank you for subscribing to our newsletter";
-		$body = "<div>You have successfully subscribed to our newsletter. Please click on the link to confirm your subscription.</div><div><a href='".esc_url( $_SERVER['REQUEST_URI'])."?ga-confirmation-token=$token'>Confirm Subscription</a></div>";
+		$body = "<div>You have successfully subscribed to our newsletter. Please click on the link to confirm your subscription.</div><div><a href='".get_home_url().esc_url( $_SERVER['REQUEST_URI'])."?ga-confirmation-token=$token'>Confirm Subscription</a></div>";
 		$headers = array('Content-Type: text/html; charset=UTF-8');
 		// if (!wp_mail($email, $subject,$body, $headers)) {
 		// 	echo "<div class='ga-success-message'>You have successfully subscribed to our newsletter. We have sent you a confirmation link on the email.</div>";

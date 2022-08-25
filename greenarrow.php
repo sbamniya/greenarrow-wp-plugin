@@ -47,7 +47,7 @@ function add_to_list($token) {
 	 curl_error($curl);
 	 curl_close($curl);
 
-	 echo "<div class='ga-success-message'>Subscribed.</div>";
+	 echo "<div class='ga-success-message'>You have been successfully Subscribed.</div>";
 }
 
 function deliver_mail() {
@@ -91,8 +91,9 @@ function deliver_mail() {
 
 	if ($isDoubleOptIn == "1") {
 		$subject = "Thank you for subscribing to our newsletter";
-		$body = "<div>You have successfully subscribed to our newsletter. Please click on the link to confirm your subscription.</div><div><a href='".get_home_url().esc_url( $_SERVER['REQUEST_URI'])."?ga-confirmation-token=$token'>Confirm Subscription</a></div>";
-		$headers = array('Content-Type: text/html; charset=UTF-8');
+		$body = '<div>You have successfully subscribed to our newsletter. Please tap on "confirm your subscription" to complete the sign up process.</div><div><a href="'.get_home_url().esc_url( $_SERVER['REQUEST_URI']).'?ga-confirmation-token=$token">Confirm Subscription</a></div>';
+		
+		// $headers = array('Content-Type: text/html; charset=UTF-8');
 		// if (!wp_mail($email, $subject,$body, $headers)) {
 		// 	echo "<div class='ga-success-message'>You have successfully subscribed to our newsletter. We have sent you a confirmation link on the email.</div>";
 		// 	return;
@@ -128,7 +129,7 @@ function deliver_mail() {
 
 		curl_close($curl);
 		if ($code === 200) {
-			echo "<div class='ga-success-message'>You have successfully subscribed to our newsletter. We have sent you a confirmation link on the email.</div>";
+			echo "<div class='ga-success-message'>Thank you for your interest in our newsletter.  Simply click the link below to confirm your subscription.</div>";
 			return;
 		}
 		echo "<div class='ga-error-message'>An error occurred while sending email.</div>";
@@ -137,9 +138,8 @@ function deliver_mail() {
 	} 
 
 	add_to_list($token);
-		
-	
 }
+
 function html_form_code() {
 	$isGoogleRecaptchaEnabled = get_option("ga-google-captcha") == 1 ? true : false;
 	if ($isGoogleRecaptchaEnabled) {
@@ -160,7 +160,7 @@ function html_form_code() {
 		
 		<form action="<?=esc_url($_SERVER['REQUEST_URI'])?>" method="post" class="ga-newsletter-form">
 			<label class="label">Email</label>
-			<input type="email" required id="nsf-email" name="nsf-email" value="<?=isset( $_POST["cf-email"] ) ? esc_attr( $_POST["nsf-email"] ) : '' ?>" size="40" class="email-input" />
+			<input type="email" required id="nsf-email" name="nsf-email" value="<?=isset( $_POST["nsf-email"] ) ? esc_attr( $_POST["nsf-email"] ) : '' ?>" size="40" class="email-input" />
 			<?php
 			if ($isGoogleRecaptchaEnabled) {
 				?>

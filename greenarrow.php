@@ -123,7 +123,7 @@ function deliver_mail() {
 					"from" => get_bloginfo("name"),
 					"subject" => $subject,
 					"message" => $body,
-					"email" => "noreply@$domain"
+					"email" => "noreply@$domain['host']"
 				)
 			)
 		));

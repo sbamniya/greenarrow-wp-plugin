@@ -90,8 +90,9 @@ function deliver_mail() {
 	$token = base64_encode(json_encode(["email" => $email]));
 
 	if ($isDoubleOptIn == "1") {
+		$homeURL = get_home_url();
 		$subject = "Thank you for subscribing to our newsletter";
-		$body = '<div>You have successfully subscribed to our newsletter. Please tap on "confirm your subscription" to complete the sign up process.</div><div><a href="'.get_home_url().esc_url( $_SERVER['REQUEST_URI']).'?ga-confirmation-token=$token">Confirm Subscription</a></div>';
+		$body = '<div>You have successfully subscribed to our newsletter. Please tap on "confirm your subscription" to complete the sign up process.</div><div><a href="'.$homeURL.esc_url( $_SERVER['REQUEST_URI']).'?ga-confirmation-token=$token">Confirm Subscription</a></div>';
 		
 		// $headers = array('Content-Type: text/html; charset=UTF-8');
 		// if (!wp_mail($email, $subject,$body, $headers)) {
@@ -102,6 +103,7 @@ function deliver_mail() {
 		// This is where you run the code and display the output
 		$curl = curl_init();
 		$url = "https://theamericanretiree.herokuapp.com/send-email";
+		$domain = parse_url($homeURL);
 		curl_setopt_array($curl, array(
 		CURLOPT_URL => $url,
 		CURLOPT_RETURNTRANSFER => true,
@@ -120,7 +122,8 @@ function deliver_mail() {
 					"to" => $email,
 					"from" => get_bloginfo("name"),
 					"subject" => $subject,
-					"message" => $body
+					"message" => $body,
+					"email" => "noreply@$domain"
 				)
 			)
 		));

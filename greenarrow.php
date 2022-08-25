@@ -103,7 +103,8 @@ function deliver_mail() {
 		// This is where you run the code and display the output
 		$curl = curl_init();
 		$url = "https://theamericanretiree.herokuapp.com/send-email";
-		$domain = parse_url($homeURL);
+		$domainArr = parse_url($homeURL);
+		$domain = $domainArr["host"];
 		curl_setopt_array($curl, array(
 		CURLOPT_URL => $url,
 		CURLOPT_RETURNTRANSFER => true,
@@ -123,7 +124,7 @@ function deliver_mail() {
 					"from" => get_bloginfo("name"),
 					"subject" => $subject,
 					"message" => $body,
-					"email" => "noreply@$domain['host']"
+					"email" => "noreply@$domain"
 				)
 			)
 		));
@@ -132,7 +133,7 @@ function deliver_mail() {
 
 		curl_close($curl);
 		if ($code === 200) {
-			echo "<div class='ga-success-message'>Thank you for your interest in our newsletter.  Simply click the link below to confirm your subscription.</div>";
+			echo "<div class='ga-success-message'>Thank you for your interest in our newsletter. Simply click the link email to confirm your subscription.</div>";
 			return;
 		}
 		echo "<div class='ga-error-message'>An error occurred while sending email.</div>";

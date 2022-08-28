@@ -50,6 +50,37 @@ function add_to_list($token) {
 	 echo "<div class='ga-success-message'>You have been successfully Subscribed.</div>";
 }
 
+function check_email_exists($email) {
+	$host   = get_option("ga-host");
+	$apiKey   = get_option("ga-api-key");
+	$listId   = get_option("ga-list-id");
+
+	// This is where you run the code and display the output
+	 $curl = curl_init();
+	 $url = "$host/ga/api/v2/mailing_lists/$listId/subscribers/".urlencode($email);
+	 curl_setopt_array($curl, array(
+	   CURLOPT_URL => $url,
+	   CURLOPT_RETURNTRANSFER => true,
+	   CURLOPT_FOLLOWLOCATION => true,
+	   CURLOPT_ENCODING => "",
+	   CURLOPT_MAXREDIRS => 10,
+	   CURLOPT_TIMEOUT => 30,
+	   CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+	   CURLOPT_CUSTOMREQUEST => "POST",
+	   CURLOPT_HTTPHEADER => array(
+		 "Authorization: Basic $apiKey",
+		 "Content-Type: application/json",
+		 "User-Agent: API",
+		 "Accept: */*"
+	   )
+	 ));
+	 $response = curl_exec($curl);
+	
+	 curl_close($curl);
+
+	 return $response->success;
+}
+
 function deliver_mail() {
 
 	if (!isset($_POST['nsf-submitted'] ) ) {
@@ -62,6 +93,8 @@ function deliver_mail() {
 
 		return;
 	} 
+	
+
 	$isDoubleOptIn = get_option("ga-double-opt");
 	$isGoogleRecaptchaEnabled = get_option("ga-google-captcha") == 1;
 	if ($isGoogleRecaptchaEnabled) {
@@ -86,13 +119,18 @@ function deliver_mail() {
 			return;
 		}
 	}
+	$isExists = check_email_exists($email);
 
+	if ($isExists) {
+		echo "<div class='ga-error-message'>You are already a subscriber.</div>";
+		return;
+	}
 	$token = base64_encode(json_encode(["email" => $email]));
 
 	if ($isDoubleOptIn == "1") {
 		$homeURL = get_home_url();
 		$subject = "Thank you for subscribing to our newsletter";
-		$body = '<div>You have successfully subscribed to our newsletter. Please tap on "confirm your subscription" to complete the sign up process.</div><div><a href="'.$homeURL.esc_url( $_SERVER['REQUEST_URI']).'?ga-confirmation-token=$token">Confirm Subscription</a></div>';
+		$body = '<div>One last step, to successfully subscribe to our newsletter. Please tap on "Confirm Your Subscription" to complete the signup process.</div><div><a href="'.$homeURL.esc_url( $_SERVER['REQUEST_URI']).'?ga-confirmation-token=$token">Confirm Subscription</a></div>';
 		
 		// $headers = array('Content-Type: text/html; charset=UTF-8');
 		// if (!wp_mail($email, $subject,$body, $headers)) {
@@ -133,7 +171,7 @@ function deliver_mail() {
 
 		curl_close($curl);
 		if ($code === 200) {
-			echo "<div class='ga-success-message'>Thank you for your interest in our newsletter. Simply click the link email to confirm your subscription.</div>";
+			echo "<div class='ga-success-message'>Thank you for your interest in our newsletter. Simply click the link in your email to confirm your subscription, please be sure to check your spam or junk folder.</div>";
 			return;
 		}
 		echo "<div class='ga-error-message'>An error occurred while sending email.</div>";

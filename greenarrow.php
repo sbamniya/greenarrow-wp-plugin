@@ -6,6 +6,14 @@ Version: 1.0
 Author: Sonu Bamniya
 Author URI: https://sbamniya.in
 */
+function clean_email($address) {
+	$addressArr = explode("@", $address);
+	$username = $addressArr[0];
+	$domain = $addressArr[1];
+	$usernameWithoutPlus = explode("+", $username)[0];
+	$usernameWithoutMinus = explode("-", $usernameWithoutPlus)[0];
+    return implode("", explode(".", $usernameWithoutMinus))."@".$domain;
+}
 
 function add_to_list($token) {
 	if (!$token) {
@@ -18,7 +26,7 @@ function add_to_list($token) {
 
 	// This is where you run the code and display the output
 	 $curl = curl_init();
-	 $url = "$host/ga/api/v2/mailing_lists/$listId/subscribers";
+	 $url = rtrim($host, "/")."/ga/api/v2/mailing_lists/$listId/subscribers";
 	 curl_setopt_array($curl, array(
 	   CURLOPT_URL => $url,
 	   CURLOPT_RETURNTRANSFER => true,
@@ -57,7 +65,7 @@ function check_email_exists($email) {
 
 	// This is where you run the code and display the output
 	 $curl = curl_init();
-	 $url = "$host/ga/api/v2/mailing_lists/$listId/subscribers/".urlencode($email);
+	 $url = rtrim($host, "/")."/ga/api/v2/mailing_lists/$listId/subscribers/".$email;
 	 curl_setopt_array($curl, array(
 	   CURLOPT_URL => $url,
 	   CURLOPT_RETURNTRANSFER => true,
@@ -66,7 +74,7 @@ function check_email_exists($email) {
 	   CURLOPT_MAXREDIRS => 10,
 	   CURLOPT_TIMEOUT => 30,
 	   CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-	   CURLOPT_CUSTOMREQUEST => "POST",
+	   CURLOPT_CUSTOMREQUEST => "GET",
 	   CURLOPT_HTTPHEADER => array(
 		 "Authorization: Basic $apiKey",
 		 "Content-Type: application/json",
@@ -77,7 +85,7 @@ function check_email_exists($email) {
 	 $response = curl_exec($curl);
 	
 	 curl_close($curl);
-
+	 $response = json_decode($response);
 	 return $response->success;
 }
 
@@ -94,7 +102,7 @@ function deliver_mail() {
 		return;
 	} 
 	
-
+	$email = clean_email($email);
 	$isDoubleOptIn = get_option("ga-double-opt");
 	$isGoogleRecaptchaEnabled = get_option("ga-google-captcha") == 1;
 	if ($isGoogleRecaptchaEnabled) {
@@ -120,8 +128,7 @@ function deliver_mail() {
 		}
 	}
 	$isExists = check_email_exists($email);
-
-	if ($isExists) {
+	if ($isExists == "1") {
 		echo "<div class='ga-error-message'>You are already a subscriber.</div>";
 		return;
 	}

@@ -178,7 +178,7 @@ function deliver_mail() {
 
 		curl_close($curl);
 		if ($code === 200) {
-			echo "<div class='ga-success-message'>Thank you for your interest in our newsletter. Simply click the link in your email to confirm your subscription, please be sure to check your <b>spam</b> or <b>junk</b> folder.</div>";
+			echo '<h4>One Last Step:</h4><div class="ga-success-message">Simply click the link in your email to confirm your subscription, please be sure to check your <b>spam</b> or <b>junk</b> folder.</div>';
 			return true;
 		}
 		echo "<div class='ga-error-message'>An error occurred while sending email.</div>";

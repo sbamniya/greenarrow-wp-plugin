@@ -17,7 +17,7 @@ function clean_email($address) {
 
 function add_to_list($token) {
 	if (!$token) {
-		return;
+		return false;
 	}
 	$host   = get_option("ga-host");
 	$apiKey   = get_option("ga-api-key");
@@ -54,8 +54,8 @@ function add_to_list($token) {
 	 curl_exec($curl);
 	 curl_error($curl);
 	 curl_close($curl);
-
 	 echo "<div class='ga-success-message'>You have been successfully Subscribed.</div>";
+	 return true;
 }
 
 function check_email_exists($email) {
@@ -92,14 +92,14 @@ function check_email_exists($email) {
 function deliver_mail() {
 
 	if (!isset($_POST['nsf-submitted'] ) ) {
-		return;
+		return false;
 	}
 	// sanitize form values
 	$email   = sanitize_email( $_POST["nsf-email"] );
 	if ( empty( $email ) ) {
 		echo "<div class='ga-error-message'>Please enter email.</div>";
 
-		return;
+		return false;
 	} 
 	
 	$email = clean_email($email);
@@ -124,13 +124,13 @@ function deliver_mail() {
 		// Checking, if response is true or not
 		if ($response->success != true) {
 			echo "<div class='ga-error-message'>Please verify captcha.</div>";
-			return;
+			return false;
 		}
 	}
 	$isExists = check_email_exists($email);
 	if ($isExists == "1") {
 		echo "<div class='ga-error-message'>You are already a subscriber.</div>";
-		return;
+		return false;
 	}
 	$token = base64_encode(json_encode(["email" => $email]));
 
@@ -178,19 +178,19 @@ function deliver_mail() {
 
 		curl_close($curl);
 		if ($code === 200) {
-			echo "<div class='ga-success-message'>Thank you for your interest in our newsletter. Simply click the link in your email to confirm your subscription, please be sure to check your spam or junk folder.</div>";
-			return;
+			echo "<div class='ga-success-message'>Thank you for your interest in our newsletter. Simply click the link in your email to confirm your subscription, please be sure to check your <b>spam</b> or <b>junk</b> folder.</div>";
+			return true;
 		}
 		echo "<div class='ga-error-message'>An error occurred while sending email.</div>";
 		
-		return;
+		return false;
 	} 
 
-	add_to_list($token);
+	return add_to_list($token);
 }
 
 function html_form_code() {
-	$isGoogleRecaptchaEnabled = get_option("ga-google-captcha") == 1 ? true : false;
+    $isGoogleRecaptchaEnabled = get_option("ga-google-captcha") == 1 ? true : false;
 	if ($isGoogleRecaptchaEnabled) {
 		?>
 			<script src="https://www.google.com/recaptcha/api.js" async defer></script>
@@ -198,14 +198,15 @@ function html_form_code() {
 	}
 	?>
     <div>
-		<p>Subscribe to our daily newsletter</p>
 		<?php 
-			deliver_mail(); 
+			$isSuccess = deliver_mail(); 
 			if (isset($_GET['ga-confirmation-token'])) {
 				add_to_list($_GET['ga-confirmation-token']);
 				wp_redirect(home_url(), '302' );
 			}
+	 	if($isSuccess == false){
 		?>
+		<p>Subscribe to our daily newsletter</p>
 		
 		<form action="<?=esc_url($_SERVER['REQUEST_URI'])?>" method="post" class="ga-newsletter-form">
 			<label class="label">Email</label>
@@ -221,6 +222,7 @@ function html_form_code() {
 			<p><input type="checkbox" required name="nsf-confirm" value="1"> By continuing, you accept the privacy policy</p>
 			<p><input type="submit" name="nsf-submitted" value="Subscribe"></p>
 		</form>
+		<?php } ?>
 	</div>
 	<style>
 		.ga-success-message {

@@ -89,13 +89,13 @@ function check_email_exists($email) {
 	 return $response->success;
 }
 
-function deliver_mail() {
+function deliver_mail($location) {
 
-	if (!isset($_POST['nsf-submitted'] ) ) {
+	if (!isset($_POST[$location.'-nsf-submitted'] ) ) {
 		return false;
 	}
 	// sanitize form values
-	$email   = sanitize_email( $_POST["nsf-email"] );
+	$email   = sanitize_email( $_POST[$location."-nsf-email"] );
 	if ( empty( $email ) ) {
 		echo "<div class='ga-error-message'>Please enter email.</div>";
 
@@ -189,7 +189,7 @@ function deliver_mail() {
 	return add_to_list($token);
 }
 
-function html_form_code() {
+function html_form_code($location) {
     $isGoogleRecaptchaEnabled = get_option("ga-google-captcha") == 1 ? true : false;
 	if ($isGoogleRecaptchaEnabled) {
 		?>
@@ -199,7 +199,7 @@ function html_form_code() {
 	?>
     <div>
 		<?php 
-			$isSuccess = deliver_mail(); 
+			$isSuccess = deliver_mail($location); 
 			if (isset($_GET['ga-confirmation-token'])) {
 				add_to_list($_GET['ga-confirmation-token']);
 				wp_redirect(home_url(), '302' );
@@ -210,7 +210,7 @@ function html_form_code() {
 		
 		<form action="<?=esc_url($_SERVER['REQUEST_URI'])?>" method="post" class="ga-newsletter-form">
 			<label class="label">Email</label>
-			<input type="email" required id="nsf-email" name="nsf-email" value="<?=isset( $_POST["nsf-email"] ) ? esc_attr( $_POST["nsf-email"] ) : '' ?>" size="40" class="email-input" />
+			<input type="email" required id="nsf-email" name="<?=$location?>-nsf-email" value="<?=isset( $_POST[$location."-nsf-email"] ) ? esc_attr( $_POST[$location."-nsf-email"] ) : '' ?>" size="40" class="email-input" />
 			<?php
 			if ($isGoogleRecaptchaEnabled) {
 				?>
@@ -220,7 +220,7 @@ function html_form_code() {
 			}
 			?>
 			<p><input type="checkbox" required name="nsf-confirm" value="1"> By continuing, you accept the privacy policy</p>
-			<p><input type="submit" name="nsf-submitted" value="Subscribe"></p>
+			<p><input type="submit" name="<?=$location?>-nsf-submitted" value="Subscribe"></p>
 		</form>
 		<?php } ?>
 	</div>
@@ -242,9 +242,13 @@ function html_form_code() {
 }
 
 
-function cf_shortcode() {
+function cf_shortcode( $atts ) {
+    $attributes = shortcode_atts(array(
+        'location' => "footer",
+    ), $atts);
+
 	ob_start();
-	html_form_code();
+	html_form_code($attributes['location']);
 
 	return ob_get_clean();
 }

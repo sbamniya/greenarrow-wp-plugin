@@ -15,7 +15,7 @@ function clean_email($address) {
     return implode("", explode(".", $usernameWithoutMinus))."@".$domain;
 }
 
-function add_to_list($token) {
+function add_to_list($token, $location) {
 	if (!$token) {
 		return false;
 	}
@@ -48,13 +48,28 @@ function add_to_list($token) {
 		  "status" => "active",
 		  "subscribe_ip" => null,
 		  "subscribe_time" => gmdate("Y-m-d\TH:i:s\Z"),
+		  "custom_fields" => array(
+		  	"Website Signup" => 1
+		  )
 		),
 	  ))
 	 ));
 	 curl_exec($curl);
 	 curl_error($curl);
 	 curl_close($curl);
-	 echo "<div class='ga-success-message'>You have been successfully Subscribed.</div>";
+	 echo '<input
+  type="checkbox"
+  name="modal__state"
+  id="'.$location.'modal__state"
+  class="modal__state"
+  checked
+/>
+<div class="modal__overlay">
+  <label for="modal__state" class="modal__overlay-close"></label>
+  <div class="modal"><label class="button button--close modal__close" for="'.$location.'modal__state">
+        X
+      </label><h4>Success:</h4><div class="ga-success-message">You have been successfully Subscribed.</div></div>
+</div>';
 	 return true;
 }
 
@@ -123,13 +138,37 @@ function deliver_mail($location) {
 		
 		// Checking, if response is true or not
 		if ($response->success != true) {
-			echo "<div class='ga-error-message'>Please verify captcha.</div>";
+			echo '<input
+  type="checkbox"
+  name="modal__state"
+  id="'.$location.'modal__state"
+  class="modal__state"
+  checked
+/>
+<div class="modal__overlay">
+  <label for="modal__state" class="modal__overlay-close"></label>
+  <div class="modal"><label class="button button--close modal__close" for="'.$location.'modal__state">
+        X
+      </label><h4>Error:</h4><div class="ga-error-message">Please verify captcha.</div></div>
+</div>';
 			return false;
 		}
 	}
 	$isExists = check_email_exists($email);
 	if ($isExists == "1") {
-		echo "<div class='ga-error-message'>You are already a subscriber.</div>";
+		echo '<input
+  type="checkbox"
+  name="modal__state"
+  id="'.$location.'modal__state"
+  class="modal__state"
+  checked
+/>
+<div class="modal__overlay">
+  <label for="modal__state" class="modal__overlay-close"></label>
+  <div class="modal"><label class="button button--close modal__close" for="'.$location.'modal__state">
+        X
+      </label><h4>Error:</h4><div class="ga-error-message">You are already a subscriber.</div></div>
+</div>';
 		return false;
 	}
 	$token = base64_encode(json_encode(["email" => $email]));
@@ -137,7 +176,7 @@ function deliver_mail($location) {
 	if ($isDoubleOptIn == "1") {
 		$homeURL = get_home_url();
 		$subject = "Thank you for subscribing to our newsletter";
-		$body = '<div>One last step, to successfully subscribe to our newsletter. Please tap on "Confirm Your Subscription" to complete the signup process.</div><div><a href="'.$homeURL.esc_url( $_SERVER['REQUEST_URI']).'?ga-confirmation-token=$token">Confirm Subscription</a></div>';
+		$body = '<div>One last step, to successfully subscribe to our newsletter. Please tap on "Confirm Your Subscription" to complete the signup process.</div><div><a href="'.$homeURL.esc_url( $_SERVER['REQUEST_URI']).'?'.$location.'-ga-confirmation-token='.$token.'">Confirm Subscription</a></div>';
 		
 		// $headers = array('Content-Type: text/html; charset=UTF-8');
 		// if (!wp_mail($email, $subject,$body, $headers)) {
@@ -178,10 +217,35 @@ function deliver_mail($location) {
 
 		curl_close($curl);
 		if ($code === 200) {
-			echo '<h4>One Last Step:</h4><div class="ga-success-message">Simply click the link in your email to confirm your subscription, please be sure to check your <b>spam</b> or <b>junk</b> folder.</div>';
+			echo '<input
+  type="checkbox"
+  name="modal__state"
+  id="'.$location.'modal__state"
+  class="modal__state"
+  checked
+/>
+<div class="modal__overlay">
+  <label for="modal__state" class="modal__overlay-close"></label>
+  <div class="modal"><label class="button button--close modal__close" for="'.$location.'modal__state">
+        X
+      </label><h4>One Last Step:</h4><div class="ga-success-message">Simply click the link in your email to confirm your subscription, please be sure to check your <b>spam</b> or <b>junk</b> folder.</div></div>
+</div>
+';
 			return true;
 		}
-		echo "<div class='ga-error-message'>An error occurred while sending email.</div>";
+		echo '<input
+  type="checkbox"
+  name="modal__state"
+  id="'.$location.'modal__state"
+  class="modal__state"
+  checked
+/>
+<div class="modal__overlay">
+  <label for="modal__state" class="modal__overlay-close"></label>
+  <div class="modal"><label class="button button--close modal__close" for="'.$location.'modal__state">
+        X
+      </label><h4>Error:</h4><div class="ga-error-message">An error occurred while sending email.</div></div>
+</div>';
 		
 		return false;
 	} 
@@ -200,8 +264,8 @@ function html_form_code($location) {
     <div>
 		<?php 
 			$isSuccess = deliver_mail($location); 
-			if (isset($_GET['ga-confirmation-token'])) {
-				add_to_list($_GET['ga-confirmation-token']);
+			if (isset($_GET[$location.'-ga-confirmation-token'])) {
+				add_to_list($_GET[$location.'-ga-confirmation-token'], $location);
 				wp_redirect(home_url(), '302' );
 			}
 	 	if($isSuccess == false){
@@ -230,13 +294,86 @@ function html_form_code($location) {
 			background-color: #afdde8;
 			border-radius: 7px;
 			margin-bottom: 10px;
+			color: #000;
 		}
 		.ga-error-message{
 			padding: 10px 20px;
 			background-color: #e8afaf;
 			border-radius: 7px;
 			margin-bottom: 10px;
+			color: #000;
 		}
+		/* modal */
+		  @keyframes fade-in {
+			0% {
+			  opacity: 0;
+			}
+			100% {
+			  opacity: 1;
+			}
+		  }
+		  .modal__overlay {
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: rgba(0, 0, 0, 0.4);
+			display: none;
+			z-index: 1111;
+		  }
+		  /* display the modal overlay when the input[type=radio] is checked */
+		  .modal__state:checked + .modal__overlay {
+			opacity: 1;
+			animation: fade-in 0.4s;
+			display: block;
+		  }
+		  @keyframes scoot-up {
+			0% {
+			  margin-top: 80px;
+			}
+			100% {
+			  margin-top: 50px;
+			}
+		  }
+		  .modal {
+			position: relative;
+			margin: 40vh auto;
+			width: 100%;
+			max-width: 500px;
+			padding: 20px;
+			background: #fff;
+			text-align: left;
+			box-shadow: 0px 0px 38px rgba(0, 0, 0, 0.2);
+			border-radius: 10px;
+			color: #000;
+		  }
+		  .modal__state:checked + .modal__overlay .modal {
+			animation: scoot-up 0.2s;
+			animation-timing-function: ease-out;
+			transform-origin: 50% 0px;
+		  }
+		  .modal__overlay-close {
+			height: 100%;
+			width: 100%;
+			position: absolute;
+			left: 0;
+			top: 0;
+		  }
+		.modal__close {
+			position: absolute;
+			top: -10px;
+			right: -10px;
+			background: #000;
+			border-radius: 100%;
+			padding: 5px 12px;
+			color: #fff;
+			cursor: pointer;
+			font-size: 12px;
+		}
+		  .modal__state {
+			display: none;
+		  }
 	</style>
 	<?php
 }

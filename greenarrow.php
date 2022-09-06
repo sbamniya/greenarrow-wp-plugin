@@ -268,13 +268,12 @@ function html_form_code($location) {
 				add_to_list($_GET[$location.'-ga-confirmation-token'], $location);
 				wp_redirect(home_url(), '302' );
 			}
-	 	if($isSuccess == false){
-		?>
+	 	?>
 		<p>Subscribe to our daily newsletter</p>
 		
 		<form action="<?=esc_url($_SERVER['REQUEST_URI'])?>" method="post" class="ga-newsletter-form">
 			<label class="label">Email</label>
-			<input type="email" required id="nsf-email" name="<?=$location?>-nsf-email" value="<?=isset( $_POST[$location."-nsf-email"] ) ? esc_attr( $_POST[$location."-nsf-email"] ) : '' ?>" size="40" class="email-input" />
+			<input type="email" required id="nsf-email" name="<?=$location?>-nsf-email" value="<?=isset( $_POST[$location."-nsf-email"] )  && $isSuccess == false ? esc_attr( $_POST[$location."-nsf-email"] ) : '' ?>" size="40" class="email-input" />
 			<?php
 			if ($isGoogleRecaptchaEnabled) {
 				?>
@@ -286,7 +285,6 @@ function html_form_code($location) {
 			<p><input type="checkbox" required name="nsf-confirm" value="1"> By continuing, you accept the privacy policy</p>
 			<p><input type="submit" name="<?=$location?>-nsf-submitted" value="Subscribe"></p>
 		</form>
-		<?php } ?>
 	</div>
 	<style>
 		.ga-success-message {
@@ -370,10 +368,15 @@ function html_form_code($location) {
 			color: #fff;
 			cursor: pointer;
 			font-size: 12px;
+			width: 30px !important;
+    		height: 30px;
 		}
-		  .modal__state {
+		.modal__state {
 			display: none;
-		  }
+		}
+		.email-input {
+			width: 100%;
+		}
 	</style>
 	<?php
 }

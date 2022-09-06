@@ -1,0 +1,86 @@
+<body>
+  <input
+    type="checkbox"
+    name="modal__state"
+    id="modal__state"
+    class="modal__state"
+    checked
+  />
+  <div class="modal__overlay">
+    <label for="modal__state" class="modal__overlay-close"></label>
+    <div class="modal">
+      <label class="button button--close modal__close" for="modal__state">
+        X
+      </label>
+      <h2>Success:</h2>
+      You are subscribed successfully.
+    </div>
+  </div>
+</body>
+
+<style>
+  /* modal */
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+  .modal__overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: block;
+  }
+  /* display the modal overlay when the input[type=radio] is checked */
+  .modal__state:checked + .modal__overlay {
+    opacity: 1;
+    animation: fade-in 0.4s;
+    display: block;
+  }
+  @keyframes scoot-up {
+    0% {
+      margin-top: 80px;
+    }
+    100% {
+      margin-top: 50px;
+    }
+  }
+  .modal {
+    position: relative;
+    margin: 40vh auto;
+    width: 100%;
+    max-width: 500px;
+    padding: 20px;
+    background: #fff;
+    text-align: left;
+    box-shadow: 0px 0px 38px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+  }
+  .modal__state:checked + .modal__overlay .modal {
+    animation: scoot-up 0.2s;
+    animation-timing-function: ease-out;
+    transform-origin: 50% 0px;
+  }
+  .modal__overlay-close {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+
+  .modal__close {
+    position: absolute;
+    top: 40px;
+    right: 20px;
+  }
+  .modal__state {
+    display: none;
+  }
+</style>

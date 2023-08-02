@@ -378,6 +378,15 @@ function html_form_code($location) {
 			width: 100%;
 		}
 	</style>
+	<script type="text/javascript">
+		window.onload = function() {
+			var script = document.createElement('script');
+			script.type = 'text/javascript';
+			script.src = 'https://s3.us-west-2.amazonaws.com/jsma/d6vohqi/ma.js';
+			script.async = true;
+			document.head.appendChild(script);
+		}
+	</script>
 	<?php
 }
 
